@@ -18,11 +18,6 @@ RUN apt-get update && apt-get install -y \
 # Clean up to reduce image size
 RUN apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
-RUN pip3 install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 \
-    && pip3 install --no-cache-dir xformers==0.0.21 \
-    && pip3 install -r requirements.txt
-
 # Create a directory for the model
 RUN mkdir /koalaai-text-moderation
 
@@ -41,8 +36,13 @@ RUN wget -O special_tokens_map.json https://huggingface.co/KoalaAI/Text-Moderati
 WORKDIR /
 
 # Add the start and the handler
-ADD src/start.sh src/rp_handler.py test_input.json ./
+ADD src/start.sh src/rp_handler.py test_input.json requirements.txt ./
 RUN chmod +x /start.sh
+
+# Install dependencies
+RUN pip3 install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 \
+    && pip3 install --no-cache-dir xformers==0.0.21 \
+    && pip3 install -r requirements.txt
 
 # Start the container
 CMD /start.sh
